@@ -3,4 +3,11 @@
 [[package]]
 name = "blinky"
 version = "0.1.0"
+dependencies = [
+ "edison 0.1.0",
+]
+
+[[package]]
+name = "edison"
+version = "0.1.0"
 

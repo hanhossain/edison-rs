@@ -1,3 +1,5 @@
+use edison::arduino;
+
 fn main() {
-    println!("Hello, world!");
+    arduino::say_hello();
 }
