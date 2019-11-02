@@ -4,15 +4,15 @@ use edison::arduino::{DigitalPin, Direction, TristateBuffer};
 fn main() {
     let mut tristate = TristateBuffer::new();
     
-    let d7 = DigitalPin::new(7, &mut tristate, Direction::Out);
+    let pin = DigitalPin::new(5, &mut tristate, Direction::In);
 
-    let delay = time::Duration::from_secs(2);
+    let delay = time::Duration::from_secs(1);
 
     loop {
-        d7.pin.set_value(1).unwrap();
+        pin.pin.set_value(1).unwrap();
         thread::sleep(delay);
         
-        d7.pin.set_value(0).unwrap();
+        pin.pin.set_value(0).unwrap();
         thread::sleep(delay);
     }
 }
