@@ -50,6 +50,8 @@ impl DigitalPin {
 
 impl Drop for DigitalPin {
     fn drop(&mut self) {
+        unexport(&self.output_enable.pin);
+        unexport(&self.pullup_resistor.pin);
         unexport(&self.pin);
     }
 }
@@ -96,12 +98,6 @@ impl PullupResistor {
     }
 }
 
-impl Drop for PullupResistor {
-    fn drop(&mut self) {
-        unexport(&self.pin);
-    }
-}
-
 // TODO: possibly rename to DirectionController
 struct OutputEnable {
     pin: Pin
@@ -120,12 +116,6 @@ impl OutputEnable {
 
     fn set_output(&self) {
         self.pin.set_direction(Direction::High).unwrap();
-    }
-}
-
-impl Drop for OutputEnable {
-    fn drop(&mut self) {
-        unexport(&self.pin);
     }
 }
 
