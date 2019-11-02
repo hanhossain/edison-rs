@@ -1,11 +1,18 @@
+use std::{thread, time};
 use edison::arduino::{DigitalPin, Direction, TristateBuffer};
 
 fn main() {
     let mut tristate = TristateBuffer::new();
     
-    let d7 = DigitalPin::new(7, &mut tristate, Direction::In);
-    println!("D7 value: {}", d7.pin.get_value().unwrap());
+    let d7 = DigitalPin::new(7, &mut tristate, Direction::Out);
 
-    let d8 = DigitalPin::new(8, &mut tristate, Direction::In);
-    println!("D8 value: {}", d8.pin.get_value().unwrap());
+    let delay = time::Duration::from_secs(2);
+
+    loop {
+        d7.pin.set_value(1).unwrap();
+        thread::sleep(delay);
+        
+        d7.pin.set_value(0).unwrap();
+        thread::sleep(delay);
+    }
 }

@@ -34,7 +34,11 @@ impl DigitalPin {
 
         tristate.disconnect_shield_pins();
 
-        output_enable.set_input();
+        match direction {
+            Direction::In => output_enable.set_input(),
+            _ => output_enable.set_output(),
+        };
+
         pullup_resistor.disable();
         gpio.set_direction(direction).unwrap();
 
