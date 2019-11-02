@@ -6,7 +6,9 @@ pub fn say_hello() {
 }
 
 pub struct DigitalPin {
-    pub pin: Pin
+    pub pin: Pin,
+    output_enable: OutputEnable,
+    pullup_resistor: PullupResistor,
 }
 
 impl DigitalPin {
@@ -16,7 +18,7 @@ impl DigitalPin {
             8 => 49,
             _ => panic!("Invalid pin_num"),
         });
-        gpio.export().unwrap();
+        export(&gpio);
 
         let pullup_resistor = PullupResistor::new(match pin_num {
             7 => 223,
@@ -39,8 +41,16 @@ impl DigitalPin {
         tristate.connect_shield_pins();
 
         DigitalPin {
-            pin: gpio
+            pin: gpio,
+            output_enable,
+            pullup_resistor,
         }
+    }
+}
+
+impl Drop for DigitalPin {
+    fn drop(&mut self) {
+        unexport(&self.pin);
     }
 }
 
@@ -51,7 +61,7 @@ pub struct TristateBuffer {
 impl TristateBuffer {
     pub fn new() -> Self {
         let pin = Pin::new(214);
-        pin.export().unwrap();
+        export(&pin);
         TristateBuffer { pin }
     }
 
@@ -64,6 +74,12 @@ impl TristateBuffer {
     }
 }
 
+impl Drop for TristateBuffer {
+    fn drop(&mut self) {
+        unexport(&self.pin);
+    }
+}
+
 struct PullupResistor {
     pin: Pin
 }
@@ -71,12 +87,18 @@ struct PullupResistor {
 impl PullupResistor {
     fn new(pin_num: u64) -> Self {
         let pin = Pin::new(pin_num);
-        pin.export().unwrap();
+        export(&pin);
         PullupResistor { pin }
     }
 
     fn disable(&self) {
         self.pin.set_direction(Direction::Low).unwrap();
+    }
+}
+
+impl Drop for PullupResistor {
+    fn drop(&mut self) {
+        unexport(&self.pin);
     }
 }
 
@@ -88,7 +110,7 @@ struct OutputEnable {
 impl OutputEnable {
     fn new(pin_num: u64) -> Self {
         let pin = Pin::new(pin_num);
-        pin.export().unwrap();
+        export(&pin);
         OutputEnable { pin }
     }
 
@@ -99,4 +121,22 @@ impl OutputEnable {
     fn set_output(&self) {
         self.pin.set_direction(Direction::High).unwrap();
     }
+}
+
+impl Drop for OutputEnable {
+    fn drop(&mut self) {
+        unexport(&self.pin);
+    }
+}
+
+fn export(pin: &Pin) {
+    // TODO: add a verbosity flag
+    // println!("Exporting gpio{}...", pin.get_pin_num());
+    pin.export().unwrap();
+}
+
+fn unexport(pin: &Pin) {
+    // TODO: add a verbosity flag
+    // println!("Unexporting gpio{}...", pin.get_pin_num());
+    let _ = pin.unexport();
 }
