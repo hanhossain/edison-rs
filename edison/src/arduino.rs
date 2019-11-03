@@ -152,14 +152,10 @@ impl OutputEnable {
 }
 
 fn export(pin: &Pin) {
-    // TODO: add a verbosity flag
-    // println!("Exporting gpio{}...", pin.get_pin_num());
     pin.export().unwrap();
 }
 
 fn unexport(pin: &Pin) {
-    // TODO: add a verbosity flag
-    // println!("Unexporting gpio{}...", pin.get_pin_num());
     let _ = pin.unexport();
 }
 
