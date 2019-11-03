@@ -10,6 +10,7 @@ pub struct DigitalPin {
     pub pin: Pin,
     output_enable: OutputEnable,
     pullup_resistor: PullupResistor,
+    pin_mux: Option<PinMux>,
 }
 
 impl DigitalPin {
@@ -25,6 +26,7 @@ impl DigitalPin {
             7 => 48,
             8 => 49,
             9 => 183,
+            13 => 40,
             _ => panic!("Invalid pin_num"),
         };
         let gpio = Pin::new(gpio_pin_num);
@@ -41,6 +43,7 @@ impl DigitalPin {
             7 => 223,
             8 => 224,
             9 => 225,
+            13 => 229,
             _ => panic!("Invalid pin_num"),
         });
 
@@ -55,10 +58,25 @@ impl DigitalPin {
             7 => 255,
             8 => 256,
             9 => 257,
+            13 => 261,
             _ => panic!("Invalid pin_num"),
         });
 
+        let pin_mux_num: Option<u64> = match pin_num {
+            13 => Some(243),
+            _ => None,
+        };
+
         tristate.disconnect_shield_pins();
+        
+        let pin_mux = match pin_mux_num {
+            Some(x) => {
+                let a = PinMux::new(x);
+                a.pin.set_direction(Direction::Low).unwrap();
+                Some(a)
+            },
+            _ => None,
+        };
 
         // set input or output
         match direction {
@@ -77,12 +95,17 @@ impl DigitalPin {
             pin: gpio,
             output_enable,
             pullup_resistor,
+            pin_mux,
         }
     }
 }
 
 impl Drop for DigitalPin {
     fn drop(&mut self) {
+        match &self.pin_mux {
+            Some(x) => unexport(&x.pin),
+            _ => (),
+        };
         unexport(&self.output_enable.pin);
         unexport(&self.pullup_resistor.pin);
         unexport(&self.pin);
@@ -148,6 +171,18 @@ impl OutputEnable {
 
     fn set_output(&self) {
         self.pin.set_direction(Direction::High).unwrap();
+    }
+}
+
+struct PinMux {
+    pin: Pin
+}
+
+impl PinMux {
+    fn new(pin_num: u64) -> Self {
+        let pin = Pin::new(pin_num);
+        export(&pin);
+        PinMux { pin }
     }
 }
 

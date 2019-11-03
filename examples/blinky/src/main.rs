@@ -4,7 +4,7 @@ use edison::arduino::{DigitalPin, Direction, TristateBuffer};
 fn main() {
     let mut tristate = TristateBuffer::new();
     
-    let pin = DigitalPin::new(5, &mut tristate, Direction::Out);
+    let pin = DigitalPin::new(13, &mut tristate, Direction::Out);
 
     let delay = time::Duration::from_secs(1);
 
