@@ -10,7 +10,8 @@ pub struct DigitalPin {
     pub pin: Pin,
     output_enable: OutputEnable,
     pullup_resistor: PullupResistor,
-    pin_mux: Option<PinMux>,
+    pin_mux0: Option<PinMux>,
+    pin_mux1: Option<PinMux>,
 }
 
 impl DigitalPin {
@@ -26,6 +27,9 @@ impl DigitalPin {
             7 => 48,
             8 => 49,
             9 => 183,
+            10 => 41,
+            11 => 43,
+            12 => 42,
             13 => 40,
             _ => panic!("Invalid pin_num"),
         };
@@ -43,6 +47,9 @@ impl DigitalPin {
             7 => 223,
             8 => 224,
             9 => 225,
+            10 => 226,
+            11 => 227,
+            12 => 228,
             13 => 229,
             _ => panic!("Invalid pin_num"),
         });
@@ -58,18 +65,33 @@ impl DigitalPin {
             7 => 255,
             8 => 256,
             9 => 257,
+            10 => 258,
+            11 => 259,
+            12 => 260,
             13 => 261,
             _ => panic!("Invalid pin_num"),
         });
 
-        let pin_mux_num: Option<u64> = match pin_num {
-            13 => Some(243),
-            _ => None,
+        let (pin_mux0_num, pin_mux1_num) = match pin_num {
+            10 => (Some(263), Some(240)),
+            11 => (Some(262), Some(241)),
+            12 => (Some(242), None),
+            13 => (Some(243), None),
+            _ => (None, None),
         };
 
         tristate.disconnect_shield_pins();
         
-        let pin_mux = match pin_mux_num {
+        let pin_mux0 = match pin_mux0_num {
+            Some(x) => {
+                let a = PinMux::new(x);
+                a.pin.set_direction(Direction::High).unwrap();
+                Some(a)
+            },
+            _ => None,
+        };
+
+        let pin_mux1 = match pin_mux1_num {
             Some(x) => {
                 let a = PinMux::new(x);
                 a.pin.set_direction(Direction::Low).unwrap();
@@ -95,17 +117,24 @@ impl DigitalPin {
             pin: gpio,
             output_enable,
             pullup_resistor,
-            pin_mux,
+            pin_mux0,
+            pin_mux1,
         }
     }
 }
 
 impl Drop for DigitalPin {
     fn drop(&mut self) {
-        match &self.pin_mux {
+        match &self.pin_mux0 {
             Some(x) => unexport(&x.pin),
             _ => (),
         };
+
+        match &self.pin_mux1 {
+            Some(x) => unexport(&x.pin),
+            _ => (),
+        };
+
         unexport(&self.output_enable.pin);
         unexport(&self.pullup_resistor.pin);
         unexport(&self.pin);
