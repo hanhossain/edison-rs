@@ -2,10 +2,6 @@ pub use sysfs_gpio::Direction;
 use sysfs_gpio::Pin;
 use std::fs;
 
-pub fn say_hello() {
-    println!("Hello!");
-}
-
 pub struct DigitalPin {
     pub pin: Pin,
     output_enable: OutputEnable,
