@@ -31,6 +31,12 @@ impl DigitalPin {
             11 => 43,
             12 => 42,
             13 => 40,
+            14 => 44,
+            15 => 45,
+            16 => 46,
+            17 => 47,
+            18 => 14,
+            19 => 165,
             _ => panic!("Invalid pin_num"),
         };
         let gpio = Pin::new(gpio_pin_num);
@@ -51,6 +57,12 @@ impl DigitalPin {
             11 => 227,
             12 => 228,
             13 => 229,
+            14 => 208,
+            15 => 209,
+            16 => 210,
+            17 => 211,
+            18 => 212,
+            19 => 213,
             _ => panic!("Invalid pin_num"),
         });
 
@@ -69,6 +81,12 @@ impl DigitalPin {
             11 => 259,
             12 => 260,
             13 => 261,
+            14 => 232,
+            15 => 233,
+            16 => 234,
+            17 => 235,
+            18 => 236,
+            19 => 237,
             _ => panic!("Invalid pin_num"),
         });
 
@@ -77,6 +95,12 @@ impl DigitalPin {
             11 => (Some(262), Some(241)),
             12 => (Some(242), None),
             13 => (Some(243), None),
+            14 => (None, Some(200)),
+            15 => (None, Some(201)),
+            16 => (None, Some(202)),
+            17 => (None, Some(203)),
+            18 => (None, Some(204)),
+            19 => (None, Some(205)),
             _ => (None, None),
         };
 
