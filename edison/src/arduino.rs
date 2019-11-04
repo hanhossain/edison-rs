@@ -161,6 +161,76 @@ impl Drop for DigitalPin {
     }
 }
 
+pub struct AnalogPin {
+    analog_num: u8,
+    output_enable: OutputEnable,
+    pullup_resistor: PullupResistor,
+    pin_mux: PinMux,
+}
+
+impl AnalogPin {
+    pub fn new(pin_num: u8, tristate: &mut TristateBuffer) -> Self {
+        let pullup_resistor = PullupResistor::new(match pin_num {
+            0 => 208,
+            1 => 209,
+            2 => 210,
+            3 => 211,
+            4 => 212,
+            5 => 213,
+            _ => panic!("Invalid pin_num"),
+        });
+
+        let output_enable = OutputEnable::new(match pin_num {
+            0 => 232,
+            1 => 233,
+            2 => 234,
+            3 => 235,
+            4 => 236,
+            5 => 237,
+            _ => panic!("Invalid pin_num"),
+        });
+
+        let pin_mux = PinMux::new(match pin_num {
+            0 => 200,
+            1 => 201,
+            2 => 202,
+            3 => 203,
+            4 => 204,
+            5 => 205,
+            _ => panic!("Invalid pin_num"),
+        });
+
+        tristate.disconnect_shield_pins();
+
+        pullup_resistor.enable();
+        output_enable.set_input();
+        pin_mux.pin.set_direction(Direction::High).unwrap();
+
+        tristate.connect_shield_pins();
+
+        AnalogPin {
+            analog_num: pin_num,
+            output_enable,
+            pullup_resistor,
+            pin_mux,
+        }
+    }
+
+    pub fn get_value(&self) -> u16 {
+        let path = format!("/sys/bus/iio/devices/iio:device1/in_voltage{}_raw", self.analog_num);
+        let raw = fs::read_to_string(path).unwrap();
+        raw.trim().parse().unwrap()
+    }
+}
+
+impl Drop for AnalogPin {
+    fn drop(&mut self) {
+        unexport(&self.pin_mux.pin);
+        unexport(&self.output_enable.pin);
+        unexport(&self.pullup_resistor.pin);
+    }
+}
+
 pub struct TristateBuffer {
     pin: Pin
 }
@@ -200,6 +270,10 @@ impl PullupResistor {
 
     fn disable(&self) {
         self.pin.set_direction(Direction::Low).unwrap();
+    }
+
+    fn enable(&self) {
+        self.pin.set_direction(Direction::High).unwrap();
     }
 }
 
