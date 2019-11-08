@@ -11,6 +11,7 @@ pub struct DigitalPin {
 }
 
 impl DigitalPin {
+    // TODO: also take in a bool for the pullup resistor. maybe make a new Direction enum that holds that?
     pub fn new(pin_num: u8, tristate: &mut TristateBuffer, direction: Direction) -> Self {
         let gpio_pin_num = match pin_num {
             0 => 130,
@@ -169,7 +170,7 @@ pub struct AnalogPin {
 }
 
 impl AnalogPin {
-    pub fn new(pin_num: u8, tristate: &mut TristateBuffer) -> Self {
+    pub fn new(pin_num: u8, pullup_enabled: bool, tristate: &mut TristateBuffer) -> Self {
         let pullup_resistor = PullupResistor::new(match pin_num {
             0 => 208,
             1 => 209,
@@ -202,7 +203,7 @@ impl AnalogPin {
 
         tristate.disconnect_shield_pins();
 
-        pullup_resistor.enable();
+        if pullup_enabled { pullup_resistor.enable() } else { pullup_resistor.disable() };
         output_enable.set_input();
         pin_mux.pin.set_direction(Direction::High).unwrap();
 
