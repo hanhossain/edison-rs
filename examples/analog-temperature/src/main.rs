@@ -12,7 +12,7 @@ fn main() {
     let mut temperatures: Vec<f64> = vec![];
 
     // initialize vector
-    for x in 0..10 {
+    for _ in 0..10 {
         temperatures.push(get_celsius(&temp_pin));
     }
 
